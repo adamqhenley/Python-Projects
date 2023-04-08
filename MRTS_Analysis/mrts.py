@@ -7,7 +7,7 @@ import yaml
 # setup database connection
 ###################################################################
 
-dbinfo = yaml.safe_load(open('db.yaml'))
+dbinfo = yaml.safe_load(open('MRTS_Analysis/db.yaml'))
 dbconfig = {
     'user':             dbinfo['user'],
     'password':         dbinfo['pwrd'],
@@ -25,7 +25,7 @@ cursor = db_connection_string.cursor()
 # import csv into pandas df
 ###################################################################
 
-df_mrts = pd.read_csv('data/MRTS_all.csv')
+df_mrts = pd.read_csv('MRTS_Analysis/data/MRTS_all.csv')
 #print(df_mrts.head())
 print(df_mrts.head())
 print(df_mrts.shape)
@@ -157,8 +157,7 @@ query = ("SELECT * FROM mrts")
 df = pd.read_sql(query, con= db_connection_string)
 
 print(df.head())
-
-
+print(df.shape)
 
 
 
