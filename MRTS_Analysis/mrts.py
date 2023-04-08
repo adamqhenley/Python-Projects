@@ -26,16 +26,10 @@ cursor = db_connection_string.cursor()
 ###################################################################
 
 df_mrts = pd.read_csv('MRTS_Analysis/data/MRTS_all.csv')
-#print(df_mrts.head())
 print(df_mrts.head())
 print(df_mrts.shape)
 
-#dfcsv = pd.read_csv('data/testdata.csv')
 
-
-#print(dfcsv)
-
-#testobj = {'CsvID','Col2','Col3','Col4','Col5','Col6'}
 arrObjs = []
 for i in range(0,len(df_mrts)):
     newrowObj = {}
@@ -44,10 +38,8 @@ for i in range(0,len(df_mrts)):
             newrowObj[c] = f'"{df_mrts[c].loc[i]}"'
         else:
             newrowObj[c] = df_mrts[c].loc[i]
-        #print(dfcsv[c].loc[i])
     arrObjs.append(newrowObj)
 
-#print(arrObjs)
 print(arrObjs[0])
 
 dbkeys = list(arrObjs[0].keys())
@@ -104,8 +96,6 @@ queries.append(queryString)
 #print(queryString)
 
 
-
-
 # query for entering data into table
 for i in range(0,len(arrObjs)):
     rec = arrObjs[i]
@@ -121,7 +111,8 @@ for i in range(0,len(arrObjs)):
         print(queryString)
 
 print(len(queries))
-#print(queries[4])
+
+
 ###################################################################
 # execute queries
 ###################################################################
@@ -130,8 +121,6 @@ for i in range(0,len(queries)):
     print(f'\n\nRun #: {i}:\n')
     print(f'{queries[i]}\n\n')
     cursor.execute(queries[i])
-
-
 
 
 
@@ -144,15 +133,11 @@ db_connection_string.commit()
 
 
 
-
-
-
 ###################################################################
 # verify query worked
 ###################################################################
 
 query = ("SELECT * FROM mrts")
-#cursor.execute(query)
 
 df = pd.read_sql(query, con= db_connection_string)
 
