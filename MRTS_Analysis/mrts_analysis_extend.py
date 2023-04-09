@@ -68,6 +68,8 @@ for i in range(0,len(queries)):
 # Output
 ###################################################################
 
+# 4 subplot demo, ref: https://matplotlib.org/stable/gallery/subplots_axes_and_figures/subplots_demo.html
+
 fig, ax = plt.subplots(2,2)
 ax[0,0].plot(df_dict['Book']['Sales_Date'],df_dict['Book']['Amount'])
 ax[0,0].set_title('Book Stores')
@@ -81,7 +83,6 @@ ax[1,0].set_title('Hobby Toy and Game Stores')
 ax[1,1].plot(df_dict['Retail']['Sales_Date'],df_dict['Retail']['Amount'])
 ax[1,1].set_title('Retail and Food Services')
 
-#plt.plot(df_dict['Book']['Sales_Date'],df_dict['Book']['Amount'])
 plt.show()
 
 ###################################################################
