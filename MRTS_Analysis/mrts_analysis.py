@@ -44,7 +44,11 @@ print(df_mrts_monthly_from_db.head())
 print(df_mrts_monthly_from_db.shape)
 pd.to_datetime(df_mrts_monthly_from_db['Sales_Date'])
 
+# ensure date values are sorted ascending (faster to sort in python than in sql)
 df_mrts_monthly_from_db.sort_values(by='Sales_Date',inplace=True)
+
+# remove values from latest year where amount = 0 due to no data available
+df_mrts_monthly_from_db = df_mrts_monthly_from_db.loc[df_mrts_monthly_from_db['Amount'] != 0]
 
 
 
