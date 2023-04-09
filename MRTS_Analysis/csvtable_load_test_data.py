@@ -7,7 +7,7 @@ import yaml
 # setup database connection
 ###################################################################
 
-dbinfo = yaml.safe_load(open('db.yaml'))
+dbinfo = yaml.safe_load(open('MRTS_Analysis/db.yaml'))
 dbconfig = {
     'user':             dbinfo['user'],
     'password':         dbinfo['pwrd'],
@@ -26,7 +26,7 @@ cursor = db_connection_string.cursor()
 # import csv into pandas df
 ###################################################################
 
-dfcsv = pd.read_csv('data/testdata.csv')
+dfcsv = pd.read_csv('MRTS_Analysis/data/testdata.csv')
 
 
 #print(dfcsv)

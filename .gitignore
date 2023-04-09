@@ -1,3 +1,4 @@
 *.yaml
 *.ipynb_checkpoints
 MRTS_Analysis/~$MRTS queryString dev.xlsx
+*.DS_Store

@@ -7,7 +7,7 @@ import yaml
 # setup database connection
 ###################################################################
 
-dbinfo = yaml.safe_load(open('db.yaml'))
+dbinfo = yaml.safe_load(open('MRTS_Analysis/db.yaml'))
 dbconfig = {
     'user':             dbinfo['user'],
     'password':         dbinfo['pwrd'],
@@ -25,34 +25,25 @@ cursor = db_connection_string.cursor()
 # import csv into pandas df
 ###################################################################
 
-df_testdata = pd.read_csv('data/testdata.csv')
-df_testdata.head()
+df_mrts = pd.read_csv('MRTS_Analysis/data/MRTS_all.csv')
+print(df_mrts.head())
+print(df_mrts.shape)
 
 
-
-#dfcsv = pd.read_csv('data/testdata.csv')
-
-
-#print(dfcsv)
-
-#testobj = {'CsvID','Col2','Col3','Col4','Col5','Col6'}
-arrObjs_testdata = []
-for i in range(0,len(df_testdata)):
+arrObjs = []
+for i in range(0,len(df_mrts)):
     newrowObj = {}
-    for c in df_testdata.columns:
-        newrowObj[c] = df_testdata[c].loc[i]
-        #print(dfcsv[c].loc[i])
-    arrObjs_testdata.append(newrowObj)
+    for c in df_mrts.columns:
+        if(c == 'Description'):
+            newrowObj[c] = f'"{df_mrts[c].loc[i]}"'
+        else:
+            newrowObj[c] = df_mrts[c].loc[i]
+    arrObjs.append(newrowObj)
 
-print(arrObjs_testdata)
+print(arrObjs[0])
 
-
-dbkeys = list(arrObjs_testdata[0].keys())
-#for k in dbkeys:
-    #print(k)
-
+dbkeys = list(arrObjs[0].keys())
 lastcol = dbkeys[-1]
-#print(lastcol)
 
 
 ###################################################################
@@ -61,45 +52,65 @@ lastcol = dbkeys[-1]
 
 queries = []
 
-q1 = "DROP DATABASE IF EXISTS `csvtestdb`;"
-q2 = "CREATE DATABASE IF NOT EXISTS `csvtestdb`;"
-q3 = "USE `csvtestdb`;"
+q1 = "DROP DATABASE IF EXISTS `mrts_db`;"
+q2 = "CREATE DATABASE IF NOT EXISTS `mrts_db`;"
+q3 = "USE `mrts_db`;"
 
 queries.append(q1)
 queries.append(q2)
 queries.append(q3)
 
-#query for dropping csvtable (if it exists)
-queryString = "DROP TABLE IF EXISTS `csvtable`;"
+#query for dropping mrts (if it exists)
+queryString = "DROP TABLE IF EXISTS `mrts`;"
 queries.append(queryString)
 
-#query for creating table csvtable
-queryString = "CREATE TABLE csvtable ("
-queryString = queryString + "ID int NOT NULL,"
-queryString = queryString + "Col2 varchar (20) NULL, "
-queryString = queryString + "Col3 varchar (20) NULL, "
-queryString = queryString + "Col4 varchar (20) NULL, "
-queryString = queryString + "Col5 varchar (20) NULL, "
-queryString = queryString + "Col6 varchar (20) NULL "
+#query for creating table mrts
+queryString = "CREATE TABLE mrts ("
+queryString = queryString + "ID int NOT NULL, "
+queryString = queryString + "NAICS_Code_1 int NULL, "
+queryString = queryString + "NAICS_Code_2 int NULL, "
+queryString = queryString + "NAICS_Code_3 int NULL, "
+queryString = queryString + "Description varchar (200) NULL, "
+queryString = queryString + "Adjusted int NULL, "
+queryString = queryString + "Year int NULL, "
+queryString = queryString + "January DECIMAL NULL, "
+queryString = queryString + "February DECIMAL NULL, "
+queryString = queryString + "March DECIMAL NULL, "
+queryString = queryString + "April DECIMAL NULL, "
+queryString = queryString + "May DECIMAL NULL, "
+queryString = queryString + "June DECIMAL NULL, "
+queryString = queryString + "July DECIMAL NULL, "
+queryString = queryString + "August DECIMAL NULL, "
+queryString = queryString + "September DECIMAL NULL, "
+queryString = queryString + "October DECIMAL NULL, "
+queryString = queryString + "November DECIMAL NULL, "
+queryString = queryString + "December DECIMAL NULL, "
+queryString = queryString + "Total DECIMAL NULL, "
+queryString = queryString + "Total_Calculated DECIMAL NULL, "
+queryString = queryString + "Verify_Calculation int NULL "
+
 queryString = queryString + ") ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 COLLATE=utf8mb4_0900_ai_ci;"
+
+
 queries.append(queryString)
 #print(queryString)
 
+
 # query for entering data into table
-for i in range(0,len(arrObjs_testdata)):
-    rec = arrObjs_testdata[i]
-    queryString = 'INSERT INTO `csvtable` VALUES('
+for i in range(0,len(arrObjs)):
+    rec = arrObjs[i]
+    queryString = 'INSERT INTO mrts VALUES ('
     for key in dbkeys:
-        queryString += str(rec[key])
+        value = rec[key]
+        queryString += str(value)
         if(key != lastcol): # hard-coded last column... TODO: consider a way to generalize the last key
             queryString += ','
     queryString += (')')
     queries.append(queryString)
-#print('\n\n')
-#print(queries)
-#print('\n\n')
+    if(i == 4):
+        print(queryString)
 
-
+print(len(queries))
 
 
 ###################################################################
@@ -113,10 +124,6 @@ for i in range(0,len(queries)):
 
 
 
-
-
-
-
 ###################################################################
 # commit changes
 # ref: https://stackoverflow.com/questions/69078992/not-saving-data-mysql-connector-python
@@ -126,21 +133,16 @@ db_connection_string.commit()
 
 
 
-
-
-
 ###################################################################
 # verify query worked
 ###################################################################
 
-query = ("SELECT * FROM csvtable")
-#cursor.execute(query)
+query = ("SELECT * FROM mrts")
 
 df = pd.read_sql(query, con= db_connection_string)
 
-print(df)
-
-
+print(df.head())
+print(df.shape)
 
 
 
