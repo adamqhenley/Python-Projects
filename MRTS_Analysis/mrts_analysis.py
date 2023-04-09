@@ -32,6 +32,7 @@ cursor.execute(use_mrts_db_sql);
 # begin analysis
 ###################################################################
 
+
 # mrts monthly data (after further pre-processing)
 query = ("""SELECT Sales_Date, Amount
             FROM mrts_monthly
@@ -51,12 +52,20 @@ df_mrts_monthly_from_db.sort_values(by='Sales_Date',inplace=True)
 df_mrts_monthly_from_db = df_mrts_monthly_from_db.loc[df_mrts_monthly_from_db['Amount'] != 0]
 
 
+query_bookstores = ("""SELECT Sales_Date, Amount
+            FROM mrts_monthly
+            WHERE Description = 'Book stores'
+            """)
+df_bookstores = pd.read_sql(query_bookstores, con= db_connection_string)
+df_bookstores.sort_values(by='Sales_Date',inplace=True)
+df_bookstores = df_bookstores.loc[df_bookstores['Amount'] != 0]
+print(df_bookstores.head())
 
 ###################################################################
 # Output
 ###################################################################
 
-plt.plot(df_mrts_monthly_from_db['Sales_Date'],df_mrts_monthly_from_db['Amount'])
+plt.plot(df_bookstores['Sales_Date'],df_bookstores['Amount'])
 plt.show()
 
 
