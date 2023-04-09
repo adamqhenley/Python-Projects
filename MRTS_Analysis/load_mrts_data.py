@@ -1,6 +1,7 @@
 import mysql.connector
 import pandas as pd
 import yaml
+import matplotlib.pyplot as plt
 
 
 ###################################################################
@@ -88,15 +89,13 @@ queryString = queryString + "December DECIMAL NULL, "
 queryString = queryString + "Total DECIMAL NULL, "
 queryString = queryString + "Total_Calculated DECIMAL NULL, "
 queryString = queryString + "Verify_Calculation int NULL "
-
 queryString = queryString + ") ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 COLLATE=utf8mb4_0900_ai_ci;"
-
-
 queries.append(queryString)
 #print(queryString)
 
 
-# query for entering data into table
+
+# query for entering data into table (mrts)
 for i in range(0,len(arrObjs)):
     rec = arrObjs[i]
     queryString = 'INSERT INTO mrts VALUES ('
@@ -111,6 +110,72 @@ for i in range(0,len(arrObjs)):
         print(queryString)
 
 print(len(queries))
+
+
+#query for creating table mrts_monthly
+queryString = "CREATE TABLE mrts_monthly ("
+queryString = queryString + "ID int NOT NULL, "
+queryString = queryString + "NAICS_Code_1 int NULL, "
+queryString = queryString + "NAICS_Code_2 int NULL, "
+queryString = queryString + "NAICS_Code_3 int NULL, "
+queryString = queryString + "Description varchar (200) NULL, "
+queryString = queryString + "Adjusted int NULL, "
+queryString = queryString + "Sales_Date varchar (10) NULL, "
+queryString = queryString + "Amount int NULL "
+queryString = queryString + ") ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 COLLATE=utf8mb4_0900_ai_ci;"
+queries.append(queryString)
+
+monthsdict = {'Jan':'01',
+              'Feb':'02',
+              'Mar':'03',
+              'Apr':'04',
+              'May':'05',
+              'Jun':'06',
+              'Jul':'07',
+              'Aug':'08',
+              'Sep':'09',
+              'Oct':'10',
+              'Nov':'11',
+              'Dec':'12'}
+
+# create date values from month values
+monthObjArr = []
+newidset = 1
+for i in range(0,len(arrObjs)):
+    obj = arrObjs[i]
+    year = obj['Year']
+    for m in monthsdict:
+        newObj = {}
+        newObj['ID'] = newidset
+        newObj['NAICS_Code_1'] = obj['NAICS_Code_1']
+        newObj['NAICS_Code_2'] = obj['NAICS_Code_2']
+        newObj['NAICS_Code_3'] = obj['NAICS_Code_3']
+        newObj['Description'] = obj['Description']
+        newObj['Adjusted'] = obj['Adjusted']
+        monthNum = monthsdict[m]
+        datestr = f'"{year}.{monthNum}.01"'
+        newObj['Sales_Date'] = datestr
+        newObj['Amount'] = obj[m]
+        monthObjArr.append(newObj)
+        newidset = newidset + 1
+    
+dbkeys = list(monthObjArr[0].keys())
+lastcol = dbkeys[-1]
+
+    #month = monthsdict[year]
+# query for entering data into table (mrts)
+for i in range(0,len(monthObjArr)):
+    rec = monthObjArr[i]
+    queryString = 'INSERT INTO mrts_monthly VALUES ('
+    for key in dbkeys:
+        value = rec[key]
+        queryString += str(value)
+        if(key != lastcol): # hard-coded last column... TODO: consider a way to generalize the last key
+            queryString += ','
+    queryString += (')')
+    queries.append(queryString)
+    if(i == 4):
+        print(queryString)
 
 
 ###################################################################
@@ -137,12 +202,40 @@ db_connection_string.commit()
 # verify query worked
 ###################################################################
 
+# mrts all data (raw)
 query = ("SELECT * FROM mrts")
 
-df = pd.read_sql(query, con= db_connection_string)
+df_mrts_from_db = pd.read_sql(query, con= db_connection_string)
 
-print(df.head())
-print(df.shape)
+print(df_mrts_from_db.head())
+print(df_mrts_from_db.shape)
+
+# mrts monthly data (after further pre-processing)
+query = ("SELECT Sales_Date, Amount FROM mrts_monthly")
+
+df_mrts_monthly_from_db = pd.read_sql(query, con= db_connection_string)
+
+print(df_mrts_monthly_from_db.head())
+print(df_mrts_monthly_from_db.shape)
+
+###################################################################
+# begin analysis
+###################################################################
+
+newcursor = db_connection_string.cursor()
+
+select_monthly_sql = ("""
+show databases;
+USE `mrts_db`;
+show tables;
+SELECT Sales_Date, Amount FROM `mrts_monthly` ORDER BY Sales_Date;
+""")
+
+newcursor.execute(select_monthly_sql);
+for row in newcursor.fetchall():
+    print(row)
+
+print(len(newcursor.fetchall()))
 
 
 
