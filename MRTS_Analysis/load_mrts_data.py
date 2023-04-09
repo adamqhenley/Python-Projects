@@ -218,26 +218,6 @@ df_mrts_monthly_from_db = pd.read_sql(query, con= db_connection_string)
 print(df_mrts_monthly_from_db.head())
 print(df_mrts_monthly_from_db.shape)
 
-###################################################################
-# begin analysis
-###################################################################
-
-newcursor = db_connection_string.cursor()
-
-select_monthly_sql = ("""
-show databases;
-USE `mrts_db`;
-show tables;
-SELECT Sales_Date, Amount FROM `mrts_monthly` ORDER BY Sales_Date;
-""")
-
-newcursor.execute(select_monthly_sql);
-for row in newcursor.fetchall():
-    print(row)
-
-print(len(newcursor.fetchall()))
-
-
 
 ###################################################################
 # close the cursor and db connection
