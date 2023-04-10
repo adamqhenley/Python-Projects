@@ -1,7 +1,13 @@
 import mysql.connector
+import numpy as np
 import pandas as pd
 import yaml
 import matplotlib.pyplot as plt
+from dateutil.parser import parse 
+import matplotlib as mpl
+import seaborn as sns
+from statsmodels.tsa.seasonal import seasonal_decompose
+from dateutil.parser import parse
 
 
 ###################################################################
@@ -82,6 +88,71 @@ ax[1,0].set_title('Hobby Toy and Game Stores')
 
 ax[1,1].plot(df_dict['Retail']['Sales_Date'],df_dict['Retail']['Amount'])
 ax[1,1].set_title('Retail and Food Services')
+
+#plt.show()
+
+def MakeSeasonalPlots(SalesCategory):
+    #
+    #
+    # Seasonal Plot, ref: https://www.machinelearningplus.com/time-series/time-series-analysis-python/
+    #
+    df_dict[SalesCategory]['year'] = [d.year for d in df_dict[SalesCategory].Sales_Date]
+    df_dict[SalesCategory]['month'] = [d.strftime('%b') for d in df_dict[SalesCategory].Sales_Date]
+    years = df_dict[SalesCategory]['year'].unique()
+    # Prep Colors
+    np.random.seed(100)
+    mycolors = np.random.choice(list(mpl.colors.XKCD_COLORS.keys()), len(years), replace=False)
+    # Draw Plot
+    plt.figure(figsize=(8,6), dpi= 80)
+    for i, y in enumerate(years):
+        if i > 0:        
+            plt.plot('month', 'Amount', data=df_dict[SalesCategory].loc[df_dict[SalesCategory].year==y, :], color=mycolors[i], label=y)
+            plt.text(df_dict[SalesCategory].loc[df_dict[SalesCategory].year==y, :].shape[0]-.9, df_dict[SalesCategory].loc[df_dict[SalesCategory].year==y, 'Amount'][-1:].values[0], y, fontsize=12, color=mycolors[i])
+    # Decoration
+    #plt.gca().set(xlim=(-0.3, 11), ylim=(2, 30), ylabel='$Book Sales$', xlabel='$Month$')
+    plt.yticks(fontsize=12, alpha=.7)
+    plt.title(f"Seasonal Plot of {SalesCategory} Sales Time Series", fontsize=20)
+    #
+    #
+    # Boxplot of Month-wise (Seasonal) and Year-wise (trend) Distribution
+    # Draw Plot
+    fig, axes = plt.subplots(1, 2, figsize=(20,7), dpi= 80)
+    sns.boxplot(x='year', y='Amount', data=df_dict[SalesCategory], ax=axes[0])
+    sns.boxplot(x='month', y='Amount', data=df_dict[SalesCategory].loc[~df_dict[SalesCategory].year.isin([1991, 2008]), :])
+    # Set Title
+    axes[0].set_title(f'{SalesCategory} Year-wise Box Plot\n(The Trend)', fontsize=18); 
+    axes[1].set_title(f'{SalesCategory} Month-wise Box Plot\n(The Seasonality)', fontsize=18)
+
+for k in descr_keys:
+    MakeSeasonalPlots(k)
+
+
+###################################################################
+# Seasonal Decomposition
+###################################################################
+
+
+
+# def MakeSeasonalPlots(SalesCategory):
+#     #
+#     # Multiplicative Decomposition 
+#     result_mul = seasonal_decompose(df_dict[SalesCategory]['Amount'], model='multiplicative', extrapolate_trend='freq')
+#     # Additive Decomposition
+#     result_add = seasonal_decompose(df_dict[SalesCategory]['Amount'], model='additive', extrapolate_trend='freq')
+#     # Plot
+#     plt.rcParams.update({'figure.figsize': (10,10)})
+#     result_mul.plot().suptitle(f'{SalesCategory} Multiplicative Decompose', fontsize=22)
+#     result_add.plot().suptitle(f'{SalesCategory} Additive Decompose', fontsize=22)
+#     #
+    
+
+# for k in descr_keys:
+#     MakeSeasonalPlots(k)
+
+
+
+
+
 
 plt.show()
 
